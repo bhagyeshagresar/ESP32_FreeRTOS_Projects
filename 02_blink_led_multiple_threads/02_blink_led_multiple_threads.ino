@@ -8,14 +8,18 @@ static const BaseType_t app_cpu = 1;
 static const int led_pin = LED_BUILTIN;
 
 
+//Both the tasks are set at the same priority
+// Note that both setup() and loop() functions run in their own task for the Arduino version of ESP-IDF. 
+//Because all three tasks (Toggle 1, Toggle 2, and “Setup and Loop”) are priority 1, the processor will split its time equally among them.
+
 // Task : Blink an LED at 2000ms
 void toggleLED_task1(void *parameter){
   while(1){
 
     digitalWrite(led_pin, HIGH);
-    vTaskDelay(400/portTICK_PERIOD_MS);
+    vTaskDelay(500/portTICK_PERIOD_MS);
     digitalWrite(led_pin, LOW);
-    vTaskDelay(400/portTICK_PERIOD_MS); //FreeRTOS defines portTICK_PERIOD_MS to 1ms
+    vTaskDelay(500/portTICK_PERIOD_MS); //FreeRTOS defines portTICK_PERIOD_MS to 1ms
 
   }
 
@@ -27,9 +31,9 @@ void toggleLED_task2(void *parameter){
   while(1){
 
     digitalWrite(led_pin, HIGH);
-    vTaskDelay(200/portTICK_PERIOD_MS);
+    vTaskDelay(323/portTICK_PERIOD_MS);
     digitalWrite(led_pin, LOW);
-    vTaskDelay(200/portTICK_PERIOD_MS); //FreeRTOS defines portTICK_PERIOD_MS to 1ms
+    vTaskDelay(323/portTICK_PERIOD_MS); //FreeRTOS defines portTICK_PERIOD_MS to 1ms
 
   }
 

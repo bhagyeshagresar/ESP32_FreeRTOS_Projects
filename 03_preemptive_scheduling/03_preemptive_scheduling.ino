@@ -1,3 +1,8 @@
+// why does the serial monitor only print the * eventhough I did not delete the first task?
+
+
+
+
 //Use only 1 core
 #if CONFIG_FREERTOS_UNICORE
   static const BaseType_t app_cpu = 0;
@@ -7,7 +12,7 @@
 
 
 //some string to print
-const char msg[] = "Introduction to RTOS";
+const char msg[] = "Introduction to RTOS2";
 
 
 //Task Handles
@@ -30,7 +35,9 @@ void startTask1(void *parameter){
       Serial.print(msg[i]);
     }
     //Serial.print(msg);
-    Serial.println();
+    //Serial.println();
+
+    //put the task in blocked state for x ms
     vTaskDelay(300/portTICK_PERIOD_MS);
 
   }
@@ -53,7 +60,7 @@ void startTask2(void *parameter){
 
 
 void setup() {
-  //Configure Serial to go slow
+  //Configure Serial to go slow so we can watch the preemption
   Serial.begin(300);
 
 
