@@ -2,7 +2,7 @@
 //The program runs as expected when both the tasks are running at the same priority. Why?
 //The program does not blink the LED when the readSerial task is at higher priority. Why?
 //The program blinks LED when the readSerial task is of lower priority than the blinkLED task. Why?
-
+//If we change the priority of blinkLED to 1, the task does not even execute. Why?
 
 // A multithreaded program to demonstrate preemptive scheduling
 #include <stdlib.h>
@@ -44,7 +44,7 @@ void readSerial(void *parameters) {
       int value = Serial.parseInt();
       led_rate = value;
       Serial.print("Entered Number:");
-      Serial.println(value);
+      Serial.println(led_rate);
 
 
 
@@ -61,6 +61,7 @@ void readSerial(void *parameters) {
 //Task 2 : blink the onboard LED at the specified rate
 void blinkLED(void *parameter){
 
+  Serial.print("Blinking LED");
 
   while(1){
 
