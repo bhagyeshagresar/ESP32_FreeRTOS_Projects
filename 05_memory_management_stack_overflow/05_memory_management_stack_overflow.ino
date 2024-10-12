@@ -42,10 +42,10 @@ void setup() {
   Serial.println("---FreeRTOS Memory Demo---");
 
   //start the task
-  //Around 700 KB of stack is overhead
+  //Around 700 KB of stack is overhead. 
   xTaskCreatePinnedToCore(testTask,
                           "Test Task",
-                           1024,
+                           1500,
                            NULL,
                            1,
                            NULL,
