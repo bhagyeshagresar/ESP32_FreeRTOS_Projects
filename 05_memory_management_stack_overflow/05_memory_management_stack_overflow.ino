@@ -22,9 +22,45 @@ void testTask(void *parameter){
     }
 
     Serial.println(b[0]);
+
+    //Print out remamining stack memory(words)
+    Serial.print("High water mark(words): ");
+    Serial.println(uxTaskGetStackHighWaterMark(NULL));
+
+    //Print out number of free heap memory bytes before malloc
+    Serial.print("Heap before malloc(bytes): ");
+    Serial.println(xPortGetFreeHeapSize());
+
+    //regular malloc is not thread safe
+    int *ptr = (int*)pvPortMalloc(1024*sizeof(int));
+
+    if(ptr == NULL){
+      Serial.println("Not enough heap");
+    }
+    else{
+
+       //do something with the memory so that it is not optimized out by the compiler
+      for(int i = 0; i < 1024; i++){
+        ptr[i] = 3;
+      }
+
+    }
+
+   
+
+    //Print out number of free heap memory bytes after malloc
+    Serial.print("Heap after malloc(bytes): ");
+    Serial.println(xPortGetFreeHeapSize());
+
+    //Free up our allocated memory
+    vPortFree(ptr);
+
+    //Wait for a while
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+
+
   }
-
-
 }
 
 
