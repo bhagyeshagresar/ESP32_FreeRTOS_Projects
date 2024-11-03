@@ -1,5 +1,10 @@
 //Memory Management Challenge: using Heap
 
+//Include
+#include <string.h>
+
+
+
 // Use only core 1 for demo purposes
 #if CONFIG_FREERTOS_UNICORE
   static const BaseType_t app_cpu = 0;
@@ -8,8 +13,13 @@
 #endif
 
 
+//Define the max string input size
+#define BUFFER_LENGTH 20
 
-
+//Define the global variables
+char *ptr = NULL;
+static char buff[BUFFER_LENGTH] = {0};
+static uint8_t index = 0;
 
 //create the two tasks
 
@@ -18,25 +28,27 @@ void allocateHeap(void *parameter){
 
   while(1){
 
-    while(Serial.available() > 0){
+    if(Serial.available() > 0){
 
-      char incomingByte = Serial.read();
-      Serial.print(incomingByte);
+      char c = Serial.read();
+      buff[index] = c;
+      index++;
+      
 
-      char *ptr = (char*)pvPortMalloc(400*sizeof(char));
+      Serial.print(c);
 
-      if(ptr == NULL){
-        Serial.print("unable to allocate memory buffer");
+      if(c == '\n'){
+
+         ptr = (char*)pvPortMalloc(BUFFER_LENGTH*sizeof(char));
+
+
+
       }
-      else{
-
-        if(incomingByte == '\n'){
-
-        }
-      }
 
 
 
+
+    
 
     }
 
