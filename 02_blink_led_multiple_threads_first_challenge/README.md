@@ -1,1 +1,1 @@
-This program demonstrates how to use two separate threads to blink an LED at two different rates using FreeRTOS
+* This program demonstrates how to use two separate threads to blink an LED at two different rates using FreeRTOS
