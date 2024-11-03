@@ -1,3 +1,7 @@
+//Demonstrate how to blink an LED using a separate thread
+
+
+
 // Use only core 1
 #if CONFIG_FREERTOS_UNICORE
 static const BaseType_t app_cpu = 0;
