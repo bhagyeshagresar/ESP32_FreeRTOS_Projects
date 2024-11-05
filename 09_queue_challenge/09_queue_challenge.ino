@@ -1,4 +1,4 @@
-
+//FreeRTOS Queue Challenge
 
 // Use only 1 core
 #if CONFIG_FREERTOS_UNICORE
@@ -8,13 +8,99 @@
 #endif
 
 
+//Define the buffer length
+#define BUFFER_LEN 10
+
+//Set the length of the queues
+static const uint8_t msg_queue_len = 10;
 
 
+//Global Handles for the two queues
+static QueueHandle_t msg_queue1;
+static QueueHandle_t msg_queue2;
+
+
+void sendDelay(void *parameter){
+
+  char buffer[BUFFER_LEN];
+
+  //initial an empty buffer of chars
+  memset(buffer, 0, BUFFER_LEN);
+
+  while(1){
+
+    //See if there is any message in queue2
+    if(xQueueReceive(msg_queue2, (void*)&buffer, 0) == pdTRUE){
+
+      int n = strlen(buffer);
+      for(int i = 0; i < n; i++){
+        Serial.print(buffer[i]);
+      }
+
+    }
+
+    //wait for 1sec
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+
+  }
+
+}
+
+
+void blinkLED(void *parameter){
+
+  char buffer2[] = "blinked";
+
+  while(1){
+
+    //Lets block the task for 10 ticks just to make sure there is space in the queue
+    if(xQueueSend(msg_queue2, (void*)&buffer2, 10) != pdTRUE){
+      Serial.println("Queue2 is full");
+
+    }
+
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+
+  }
+
+}
 
 
 
 void setup() {
-  // put your setup code here, to run once:
+
+  //Configure the serial
+  Serial.begin(300);
+
+  //Wait for a moment so that we do not miss serial output
+  vTaskDelay(1000/portTICK_PERIOD_MS);
+  Serial.println();
+  Serial.println("---FreeRTOS Queue Challenge");
+
+  //Create two queues of specific length
+  msg_queue1 = xQueueCreate(msg_queue_len, BUFFER_LEN);
+  msg_queue2 = xQueueCreate(msg_queue_len, BUFFER_LEN);
+
+  //start the two tasks
+  xTaskCreatePinnedToCore(sendDelay,
+                          "Send Delay",
+                          1024,
+                          NULL,
+                          1,
+                          NULL,
+                          app_cpu);
+
+  
+  xTaskCreatePinnedToCore(blinkLED,
+                          "Blink LED",
+                          1024,
+                          NULL,
+                          1,
+                          NULL,
+                          app_cpu);
+
+
+
 
 }
 

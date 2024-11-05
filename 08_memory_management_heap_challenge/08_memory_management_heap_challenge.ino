@@ -39,25 +39,25 @@ void allocateHeap(void *parameter){
 
       if(index < BUFFER_LENGTH-1){
         buff[index] = c;
-        Serial.print(buff[index]);
-        index;
-        Serial.print(index);
-
-        //index++;
+        index++;
+        
 
       }
 
+      uint8_t actual_buffer_size = strlen(buff);
+      Serial.println(actual_buffer_size);
 
-      // if(c == '\n'){
+
+
+      if(c == '\n'){
         
-      //    ptr = (char*)pvPortMalloc(BUFFER_LENGTH*sizeof(char));
+         //ptr = (char*)pvPortMalloc(BUFFER_LENGTH*sizeof(char));
+         uint8_t actual_buffer_size = strlen(buff);
+         Serial.println(actual_buffer_size);
 
-      //    if(isMessageReady == 0){
+        
 
-      //    }
-
-
-      // }
+      }
 
     }
 
