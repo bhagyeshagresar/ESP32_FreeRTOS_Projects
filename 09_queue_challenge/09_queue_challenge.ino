@@ -1,5 +1,8 @@
 //FreeRTOS Queue Challenge
 
+#include <string.h>
+#include <stdlib.h>
+
 // Use only 1 core
 #if CONFIG_FREERTOS_UNICORE
   static const BaseType_t app_cpu = 0;
@@ -11,8 +14,14 @@
 //Define the buffer length
 #define BUFFER_LEN 10
 
+//Configure the Pin
+static const int led_pin = LED_BUILTIN;
+
 //Set the length of the queues
 static const uint8_t msg_queue_len = 10;
+
+//Global led delay variable
+static volatile int led_delay = 0;
 
 
 //Global Handles for the two queues
@@ -22,48 +31,100 @@ static QueueHandle_t msg_queue2;
 
 void sendDelay(void *parameter){
 
-  char buffer[BUFFER_LEN];
+  //Copy the message stored in Queue2 in this buffer
+  char from_queue2[BUFFER_LEN];
+
+  //Copy the message sent over serial if it contains "delay xx"
+  char to_terminal[BUFFER_LEN];
+  uint8_t index = 0;
+  char c;
+  char* p;
 
   //initial an empty buffer of chars
-  memset(buffer, 0, BUFFER_LEN);
+  memset(from_queue2, 0, BUFFER_LEN);
 
   while(1){
 
-    //See if there is any message in queue2
-    if(xQueueReceive(msg_queue2, (void*)&buffer, 0) == pdTRUE){
+    //See if there is any "blinked" message in queue2. If so, print to the terminal
+    if(xQueueReceive(msg_queue2, (void*)&from_queue2, 0) == pdTRUE){
 
-      int n = strlen(buffer);
+      int n = strlen(from_queue2);
       for(int i = 0; i < n; i++){
-        Serial.print(buffer[i]);
+        Serial.print(from_queue2[i]);
+      }
+    }
+
+    //Read data from serial and echo back. Check if the serial input says "delay x". 
+    //If so, copy the delay time to the to_queue1 buffer and send to to queue1
+    if(Serial.available() > 0){
+
+      c = Serial.read();
+      Serial.print(c);
+
+      if(c == '\n'){
+        //we have reached the end of the string. Check for "delay x" usting strstr function
+        p = strstr(to_terminal, "delay ");
+        char* end;
+        Serial.print(p);
+       
+        while(*p){
+          if(isdigit(*p)){
+            led_delay = atoi(p);
+          }
+          else{
+            p++;
+          }
+        }
+        Serial.print(led_delay);
+
+        memset(to_terminal, 0, BUFFER_LEN);
+        index = 0;
+      
       }
 
-    }
+      else{
 
-    //wait for 1sec
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+        if(index < BUFFER_LEN-1){
+          to_terminal[index] = c;
+          index++;
+        }
+        
 
-  }
+      }
 
-}
+      }
 
+      //wait for 1secdelay 500
+      //vTaskDelay(1000/portTICK_PERIOD_MS);
+     
 
-void blinkLED(void *parameter){
-
-  char buffer2[] = "blinked";
-
-  while(1){
-
-    //Lets block the task for 10 ticks just to make sure there is space in the queue
-    if(xQueueSend(msg_queue2, (void*)&buffer2, 10) != pdTRUE){
-      Serial.println("Queue2 is full");
 
     }
 
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+   
 
   }
 
-}
+
+
+
+// void blinkLED(void *parameter){
+
+//   char buffer2[] = "blinked";
+
+//   while(1){
+
+//     //Lets block the task for 10 ticks just to make sure there is space in the queue
+//     // if(xQueueSend(msg_queue2, (void*)&buffer2, 10) != pdTRUE){
+//     //   Serial.println("Queue2 is full");
+
+//     // }
+
+//     // vTaskDelay(1000/portTICK_PERIOD_MS);
+
+//   }
+
+// }
 
 
 
@@ -84,20 +145,20 @@ void setup() {
   //start the two tasks
   xTaskCreatePinnedToCore(sendDelay,
                           "Send Delay",
-                          1024,
+                          2048,
                           NULL,
                           1,
                           NULL,
                           app_cpu);
 
   
-  xTaskCreatePinnedToCore(blinkLED,
-                          "Blink LED",
-                          1024,
-                          NULL,
-                          1,
-                          NULL,
-                          app_cpu);
+  // xTaskCreatePinnedToCore(blinkLED,
+  //                         "Blink LED",
+  //                         1024,
+  //                         NULL,
+  //                         1,
+  //                         NULL,
+  //                         app_cpu);
 
 
 
