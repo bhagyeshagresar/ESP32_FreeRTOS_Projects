@@ -18,46 +18,52 @@
 
 //Define the global variables
 char *ptr = NULL;
-static char buff[BUFFER_LENGTH] = {0};
-static uint8_t index = 0;
+static volatile uint8_t isMessageReady = 0;
 
 //create the two tasks
-
 //Task1 : Listens to an input over Serial and store the characters in a string in heap
 void allocateHeap(void *parameter){
 
-  while(1){
+  static char buff[BUFFER_LENGTH];
+  static uint8_t index = 0;
 
+  memset(buff, 0, BUFFER_LENGTH);
+  
+  while(1){
+    
     if(Serial.available() > 0){
 
       char c = Serial.read();
-      buff[index] = c;
-      index++;
-      
-
-      Serial.print(c);
-
-      if(c == '\n'){
-
-         ptr = (char*)pvPortMalloc(BUFFER_LENGTH*sizeof(char));
+      //Serial.print(c);
 
 
+      if(index < BUFFER_LENGTH-1){
+        buff[index] = c;
+        Serial.print(buff[index]);
+        index;
+        Serial.print(index);
+
+        //index++;
 
       }
 
 
+      // if(c == '\n'){
+        
+      //    ptr = (char*)pvPortMalloc(BUFFER_LENGTH*sizeof(char));
+
+      //    if(isMessageReady == 0){
+
+      //    }
 
 
-    
+      // }
 
     }
 
-
   }
-
-
-
 }
+
 
 
 
@@ -78,7 +84,7 @@ void setup() {
   vTaskDelay(1000/portTICK_PERIOD_MS);
   Serial.println();
   Serial.println("---FreeRTOS Heap Demo---");
-
+  Serial.println("Enter string");
 
   //Start the tasks
   xTaskCreatePinnedToCore(allocateHeap,
