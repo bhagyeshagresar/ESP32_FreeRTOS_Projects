@@ -12,7 +12,7 @@
 
 
 //Define the buffer length
-#define BUFFER_LEN 10
+#define BUFFER_LEN 100
 
 //Configure the Pin
 static const int led_pin = LED_BUILTIN;
@@ -21,7 +21,7 @@ static const int led_pin = LED_BUILTIN;
 static const uint8_t msg_queue_len = 10;
 
 //Global led delay variable
-static volatile int led_delay = 0;
+static volatile int led_delay = 300;
 
 
 //Global Handles for the two queues
@@ -59,23 +59,25 @@ void sendDelay(void *parameter){
     if(Serial.available() > 0){
 
       c = Serial.read();
-      Serial.print(c);
 
-      if(c == '\n'){
+    
+      if(c == '\n' || c == '\r'){
         //we have reached the end of the string. Check for "delay x" usting strstr function
-        p = strstr(to_terminal, "delay ");
-        char* end;
-        Serial.print(p);
+        p = strstr(to_terminal, "delay is ");
+
+        //this is a string literal. if you do p + n, you are pointing to unknown memory location
+        //p = "delay is ";
+
+        uint8_t n = strlen(p);
+        
+        //char* sp = p;
+
+        //Get the number from the substring
+        char* str = to_terminal + n;
+        led_delay = atoi(str);
+
+
        
-        while(*p){
-          if(isdigit(*p)){
-            led_delay = atoi(p);
-          }
-          else{
-            p++;
-          }
-        }
-        Serial.print(led_delay);
 
         memset(to_terminal, 0, BUFFER_LEN);
         index = 0;
@@ -88,22 +90,24 @@ void sendDelay(void *parameter){
           to_terminal[index] = c;
           index++;
         }
-        
 
       }
 
-      }
+      
+
+    }
 
       //wait for 1secdelay 500
       //vTaskDelay(1000/portTICK_PERIOD_MS);
      
 
 
-    }
+    
 
    
 
   }
+}
 
 
 
@@ -131,7 +135,7 @@ void sendDelay(void *parameter){
 void setup() {
 
   //Configure the serial
-  Serial.begin(300);
+  Serial.begin(115200);
 
   //Wait for a moment so that we do not miss serial output
   vTaskDelay(1000/portTICK_PERIOD_MS);
@@ -159,6 +163,8 @@ void setup() {
   //                         1,
   //                         NULL,
   //                         app_cpu);
+
+  vTaskDelete(NULL);
 
 
 
