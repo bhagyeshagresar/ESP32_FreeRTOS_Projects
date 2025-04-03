@@ -50,7 +50,7 @@ void myTask(void* parameters){
 
 void setup() {
 
-   char task_name[12];
+  char task_name[12];
   Message msg;
   char text[20] = "All your base";
   
