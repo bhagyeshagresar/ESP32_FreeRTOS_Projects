@@ -59,14 +59,11 @@ void producer(void *parameters) {
     xSemaphoreTake(sem_space, portMAX_DELAY);
 
     //lock the resource using a mutex
-    if(xSemaphoreTake(mutex, 0) == pdTRUE){
-      buf[head] = num;
-      head = (head + 1) % BUF_SIZE;
-      
-      //give mutex
-      xSemaphoreGive(mutex);
-
-    }
+    // Wait for empty slot in buffer to be available
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    buf[head] = num;
+    head = (head + 1) % BUF_SIZE;
+    xSemaphoreGive(mutex); //give mutex
 
     //increment the count of the number of items
     xSemaphoreGive(sem_count);
@@ -90,21 +87,14 @@ void consumer(void *parameters) {
     xSemaphoreTake(sem_count, portMAX_DELAY);
 
     //take mutex
-    if(xSemaphoreTake(mutex, 0) == pdTRUE){
-
-      val = buf[tail];
-      tail = (tail + 1) % BUF_SIZE;
-      Serial.println(val);
-
-      //give mutex
-      xSemaphoreGive(mutex);
-
-    }
+   xSemaphoreTake(mutex, portMAX_DELAY);
+   val = buf[tail];
+   tail = (tail + 1) % BUF_SIZE;
+   Serial.println(val);
+   xSemaphoreGive(mutex);  //give mutex
 
     //signal that a space is avaialbel
     xSemaphoreGive(sem_space);
-
-    
   }
 }
 
@@ -121,7 +111,7 @@ void setup() {
   // Wait a moment to start (so we don't miss Serial output)
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   Serial.println();
-  Serial.println("---FreeRTOS Semaphore Alternate Solution---");
+  Serial.println("---FreeRTOS Semaphore Producer Consumer Challenge");
 
   // Create mutexes and semaphores before starting tasks
   bin_sem = xSemaphoreCreateBinary();

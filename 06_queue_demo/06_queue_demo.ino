@@ -24,22 +24,21 @@ static QueueHandle_t msg_queue;
 //Tasks
 //This task reads values from the FreeRTOS queue and prints on serial monitor
 void printMessages(void *parameter){
-  
-  int item;
 
+  int item;
   while(1){
 
     //See if there is a message in the queue(do not block)
     if (xQueueReceive(msg_queue, (void *)&item, 0) == pdTRUE){
 
       //print only if there is message in the queue
-      //Serial.println(item);
+      Serial.println(item);
     }
 
-    Serial.println(item);
+    //Serial.println(item);
 
     //Wait for 1 sec
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    vTaskDelay(300/portTICK_PERIOD_MS);
 
 
   }
@@ -81,7 +80,7 @@ void loop() {
   static int num = 0;
 
   //Block the task for 10 ticks so that there is space available on the queue
-  if(xQueueSend(msg_queue, (void*)&num, 0) != pdTRUE){
+  if(xQueueSend(msg_queue, (void*)&num, 10) != pdTRUE){
     Serial.println("Queue Full");
   }
   num++;
